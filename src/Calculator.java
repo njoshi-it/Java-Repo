@@ -1,110 +1,95 @@
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
-public class Calculator extends JFrame implements ActionListener {
-    JTextField inputField;
-    double num1, num2;
-    String operator;
-    boolean isOperatorClicked = false;
+public class Calculator extends Application {
 
-    public Calculator() {
-        setTitle("Simple Calculator");
-        setSize(350, 450);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setLayout(null);
+    private TextField inputField = new TextField();
+    private double num1 = 0;
+    private String operator = null;
+    private boolean isOperatorClicked = false;
 
-        inputField = new JTextField();
-        inputField.setBounds(20, 20, 300, 40);
+    @Override
+    public void start(Stage stage) {
         inputField.setEditable(false);
-        inputField.setFont(new Font("Arial", Font.BOLD, 20));
-        add(inputField);
+        inputField.setStyle("-fx-font-size: 20px;");
+        inputField.setPrefHeight(50);
 
-        String[] buttonLabels = {
-            "7", "8", "9", "/", 
-            "4", "5", "6", "*", 
-            "1", "2", "3", "-", 
-            "0", "C", "=", "+"
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(10));
+
+        String[][] buttons = {
+                {"7", "8", "9", "/"},
+                {"4", "5", "6", "*"},
+                {"1", "2", "3", "-"},
+                {"0", "C", "=", "+"}
         };
 
-        int x = 20, y = 80;
-        for (int i = 0; i < buttonLabels.length; i++) {
-            JButton btn = new JButton(buttonLabels[i]);
-            btn.setBounds(x, y, 65, 50);
-            btn.setFont(new Font("Arial", Font.BOLD, 16));
-            btn.addActionListener(this);
-            add(btn);
-
-            x += 75;
-            if ((i + 1) % 4 == 0) {
-                x = 20;
-                y += 60;
+        for (int row = 0; row < buttons.length; row++) {
+            for (int col = 0; col < buttons[row].length; col++) {
+                String label = buttons[row][col];
+                Button btn = new Button(label);
+                btn.setPrefSize(60, 60);
+                btn.setStyle("-fx-font-size: 18px;");
+                btn.setOnAction(e -> handleInput(label));
+                grid.add(btn, col, row);
             }
         }
+
+        VBox root = new VBox(10, inputField, grid);
+        root.setPadding(new Insets(20));
+        Scene scene = new Scene(root, 300, 400);
+
+        stage.setTitle("JavaFX Calculator");
+        stage.setScene(scene);
+        stage.show();
     }
 
-    public void actionPerformed(ActionEvent e) {
-        String cmd = e.getActionCommand();
-
-        // If a number is clicked
+    private void handleInput(String cmd) {
         if (cmd.matches("[0-9]")) {
             if (isOperatorClicked) {
-                inputField.setText(""); // clear for second number
+                inputField.clear();
                 isOperatorClicked = false;
             }
-            inputField.setText(inputField.getText() + cmd);
-        }
-
-        // If an operator is clicked
-        else if (cmd.matches("[+\\-*/]")) {
-            try {
+            inputField.appendText(cmd);
+        } else if (cmd.matches("[+\\-*/]")) {
+            if (!inputField.getText().isEmpty()) {
                 num1 = Double.parseDouble(inputField.getText());
                 operator = cmd;
                 isOperatorClicked = true;
-            } catch (NumberFormatException ex) {
-                inputField.setText("Error");
             }
-        }
-
-        // Equals (=) clicked
-        else if (cmd.equals("=")) {
-            try {
-                num2 = Double.parseDouble(inputField.getText());
-                String result;
-
-                switch (operator) {
-                    case "+" -> result = String.valueOf(num1 + num2);
-                    case "-" -> result = String.valueOf(num1 - num2);
-                    case "*" -> result = String.valueOf(num1 * num2);
-                    case "/" -> {
-                        if (num2 == 0) {
-                            result = "∞";
-                        } else {
-                            result = String.valueOf(num1 / num2);
-                        }
-                    }
-                    default -> result = "Error";
-                }
-
-                inputField.setText(result);
-             }catch (NumberFormatException ex) {
+        } else if (cmd.equals("=")) {
+            if (inputField.getText().isEmpty() || operator == null) {
                 inputField.setText("Error");
-                 }
-            
-        }
-
-        // Clear (C) clicked
-        else if (cmd.equals("C")) {
-            inputField.setText("");
-            num1 = num2 = 0;
-            operator = "";
+                return;
+            }
+            double num2 = Double.parseDouble(inputField.getText());
+            String result;
+            switch (operator) {
+                case "+" -> result = String.valueOf(num1 + num2);
+                case "-" -> result = String.valueOf(num1 - num2);
+                case "*" -> result = String.valueOf(num1 * num2);
+                case "/" -> result = (num2 == 0) ? "Undefined" : String.valueOf(num1 / num2);
+                default -> result = "Error";
+            }
+            inputField.setText(result);
+        } else if (cmd.equals("C")) {
+            inputField.clear();
+            num1 = 0;
+            operator = null;
         }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new Calculator().setVisible(true);
-        });
+        launch(args);
     }
 }

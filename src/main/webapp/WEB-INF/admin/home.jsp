@@ -1,5 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8" session="true"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="true" %>
 <%@ page import="potapp.model.User" %>
 
 <%
@@ -14,21 +13,18 @@
 <html>
 <head>
     <meta charset="UTF-8" />
-    <title>Admin Dashboard</title>
+    <title>Admin Home</title>
     <style>
         body { font-family: Arial, sans-serif; }
         nav a { margin-right: 15px; text-decoration: none; }
-        .welcome { margin-bottom: 20px; }
+        .category-list { margin-top: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="welcome">
-        <h2>Welcome, <%= user.getName() %> (Admin)</h2>
-    </div>
-
+    <h2>Admin Home</h2>
     <nav>
-        <a href="home.jsp">Home</a>
+        <a href="dashboard.jsp">Dashboard</a>
         <a href="users.jsp">Users</a>
         <a href="poems.jsp">Poems</a>
         <a href="<%= request.getContextPath() %>/logout">Logout</a>
@@ -36,8 +32,19 @@
 
     <hr />
 
-    <h3>Dashboard Overview</h3>
-    <p>Put your admin summary and stats here.</p>
+    <h3>Poem Categories</h3>
+    <div class="category-list">
+        <%-- 
+            Here, you could list categories dynamically.
+            For now, a static example:
+        --%>
+        <ul>
+            <li>Romantic</li>
+            <li>Patriotic</li>
+            <li>Sarcastic</li>
+            <li>Nature</li>
+        </ul>
+    </div>
 
 </body>
 </html>

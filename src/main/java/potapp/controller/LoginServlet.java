@@ -9,11 +9,25 @@ import jakarta.servlet.http.*;
 
 import java.io.IOException;
 
-@WebServlet("/loginSubmit")  // Handles form POST
+@WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
-    private UserDAO userDAO = new UserDAO();
+    private UserDAO userDAO;
 
+    @Override
+    public void init() {
+        userDAO = new UserDAO();
+    }
+
+    // Handles GET request to show login page
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.getRequestDispatcher("login.jsp").forward(request, response);
+    }
+
+    // Handles POST request to process login
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -26,14 +40,14 @@ public class LoginServlet extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
 
-            if ("admin".equals(user.getRole())) {
-                response.sendRedirect("admin/dashboard.jsp");
+            if ("admin".equalsIgnoreCase(user.getRole())) {
+                response.sendRedirect("dashboard/admin/home.jsp");
             } else {
-                response.sendRedirect("user/dashboard.jsp");
+                response.sendRedirect("dashboard/user/home.jsp");
             }
         } else {
             request.setAttribute("error", "Invalid email or password");
-            request.getRequestDispatcher("/WEB-INF/login.jsp").forward(request, response);
+            request.getRequestDispatcher("login.jsp").forward(request, response);
         }
     }
 }

@@ -33,17 +33,25 @@ public class LoginServlet extends HttpServlet {
 
         String email = request.getParameter("email");
         String password = request.getParameter("password");
+        
+     // 🔍 Debug Log 1: Show raw input
+        System.out.println("[DEBUG] Email entered: " + email);
+        System.out.println("[DEBUG] Password entered: " + password);
+
 
         User user = userDAO.getUserByEmailAndPassword(email, password);
 
         if (user != null) {
+        	
+            System.out.println("[DEBUG] Login successful for user: " + user.getName() + ", Role: " + user.getRole());
+
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
 
             if ("admin".equalsIgnoreCase(user.getRole())) {
-                response.sendRedirect("dashboard/admin/home.jsp");
+                response.sendRedirect("admin/home.jsp");
             } else {
-                response.sendRedirect("dashboard/user/home.jsp");
+                response.sendRedirect("user/home.jsp");
             }
         } else {
             request.setAttribute("error", "Invalid email or password");

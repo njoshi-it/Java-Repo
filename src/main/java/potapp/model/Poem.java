@@ -4,22 +4,23 @@ public class Poem {
     private int id;
     private String title;
     private String content;
-    private String category;
+    private String category;    // category name as String
     private int userId;
-
-    // Constructors, including no-arg and parameterized ones (optional)
+    private double value;       // added field
 
     public Poem() {}
 
-    public Poem(int id, String title, String content, String category, int userId) {
+    public Poem(int id, String title, String content, String category, int userId, double value) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.category = category;
         this.userId = userId;
+        this.value = value;
     }
 
-    // Getter and Setter for id
+    // getters and setters
+
     public int getId() {
         return id;
     }
@@ -27,7 +28,6 @@ public class Poem {
         this.id = id;
     }
 
-    // Getter and Setter for title
     public String getTitle() {
         return title;
     }
@@ -35,7 +35,6 @@ public class Poem {
         this.title = title;
     }
 
-    // Getter and Setter for content
     public String getContent() {
         return content;
     }
@@ -43,7 +42,6 @@ public class Poem {
         this.content = content;
     }
 
-    // Getter and Setter for category
     public String getCategory() {
         return category;
     }
@@ -51,11 +49,17 @@ public class Poem {
         this.category = category;
     }
 
-    // Getter and Setter for userId
     public int getUserId() {
         return userId;
     }
     public void setUserId(int userId) {
         this.userId = userId;
+    }
+
+    public double getValue() {
+        return value;
+    }
+    public void setValue(double value) {
+        this.value = value;
     }
 }

@@ -35,18 +35,18 @@ public class AdminServlet extends HttpServlet {
             case "users":
                 List<User> users = userDAO.getAllUsers();
                 request.setAttribute("users", users);
-                request.getRequestDispatcher("dashboard/admin/users.jsp").forward(request, response);
+                request.getRequestDispatcher("/admin/users.jsp").forward(request, response);
                 break;
 
             case "poems":
                 List<Poem> poems = poemDAO.getAllPoems();
                 request.setAttribute("poems", poems);
-                request.getRequestDispatcher("dashboard/admin/poems.jsp").forward(request, response);
+                request.getRequestDispatcher("/admin/poems.jsp").forward(request, response);
                 break;
 
             case "dashboard":
             default:
-                request.getRequestDispatcher("dashboard/admin/home.jsp").forward(request, response);
+                request.getRequestDispatcher("/admin/home.jsp").forward(request, response);
                 break;
         }
     }

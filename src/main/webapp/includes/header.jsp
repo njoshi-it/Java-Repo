@@ -3,6 +3,8 @@
 
 <%
     User currentUser = (User) session.getAttribute("user");
+    String role = (currentUser != null) ? currentUser.getRole() : "";
+    
     String homeLink = request.getContextPath() + "/login.jsp"; // default
 
     if (currentUser != null) {
@@ -26,6 +28,12 @@
 <body>
 <nav>
     <a href="<%= homeLink %>">Home</a>
+
+    <% if ("admin".equals(role)) { %>
+        <a href="<%= request.getContextPath() %>/dashboard/admin_posts.jsp">Posts</a>
+        <a href="<%= request.getContextPath() %>/dashboard/admin_users.jsp">Users</a>
+    <% } %>
+
     <a href="<%= request.getContextPath() %>/LogoutServlet">Logout</a>
 </nav>
 <hr>

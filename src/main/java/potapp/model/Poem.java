@@ -1,22 +1,27 @@
 package potapp.model;
 
+import java.sql.Timestamp;
+
 public class Poem {
     private int id;
     private String title;
     private String content;
-    private String category;    // category name as String
     private int userId;
-    private double value;       // added field
+    private int categoryId;
+    private float rating;
+    private Timestamp createdAt;
 
+    // Constructors
     public Poem() {}
 
-    public Poem(int id, String title, String content, String category, int userId, double value) {
+    public Poem(int id, String title, String content, int userId, int categoryId, float rating, Timestamp createdAt) {
         this.id = id;
         this.title = title;
         this.content = content;
-        this.category = category;
         this.userId = userId;
-        this.value = value;
+        this.categoryId = categoryId;
+        this.rating = rating;
+        this.createdAt = createdAt;
     }
 
     // getters and setters
@@ -42,11 +47,11 @@ public class Poem {
         this.content = content;
     }
 
-    public String getCategory() {
-        return category;
+    public int getCategoryId() {
+        return categoryId;
     }
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCategory(int categoryId) {
+        this.categoryId = categoryId;
     }
 
     public int getUserId() {
@@ -56,10 +61,10 @@ public class Poem {
         this.userId = userId;
     }
 
-    public double getValue() {
-        return value;
+    public double getRating() {
+        return rating;
     }
-    public void setValue(double value) {
-        this.value = value;
+    public void setRating(float rating) {
+        this.rating = rating;
     }
 }

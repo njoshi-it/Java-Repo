@@ -1,4 +1,5 @@
 <!-- WebContent/dashboard/posts.jsp -->
+<jsp:include page="../includes/header.jsp" />
 <h3>Manage Posts</h3>
 <table border="1" cellpadding="10">
     <tr>
@@ -18,3 +19,4 @@
     </tr>
     <!-- More dummy rows -->
 </table>
+<jsp:include page="../includes/footer.jsp" />

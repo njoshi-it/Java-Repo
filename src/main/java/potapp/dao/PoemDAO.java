@@ -116,4 +116,18 @@ public class PoemDAO {
 
         return false;
     }
+    public boolean deletePoem(int id) {
+        String sql = "DELETE FROM poems WHERE id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

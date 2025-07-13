@@ -48,10 +48,12 @@
                 <button>Edit</button>
             </form>
 
-            <form action="DeletePoemServlet" method="post" style="display:inline;">
-                <input type="hidden" name="id" value="<%= poem.getId() %>">
-                <button onclick="return confirm('Are you sure you want to delete this poem?')">Delete</button>
-            </form>
+            <form action="<%= request.getContextPath() %>/DeletePoemServlet" method="get" style="display:inline;" 
+      onsubmit="return confirm('Are you sure you want to delete this poem?');">
+    <input type="hidden" name="id" value="<%= poem.getId() %>">
+    <button type="submit" style="background-color:red; color:white;">Delete</button>
+</form>
+
         </td>
     </tr>
     <%

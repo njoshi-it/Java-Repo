@@ -67,4 +67,11 @@ public class Poem {
     public void setRating(float rating) {
         this.rating = rating;
     }
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
 }

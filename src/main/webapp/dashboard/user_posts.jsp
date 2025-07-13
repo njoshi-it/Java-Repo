@@ -43,7 +43,7 @@
         <td><%= poem.getRating() %></td>
         <td><%= poem.getCreatedAt() %></td>
         <td>
-            <form action="EditPoemServlet" method="get" style="display:inline;">
+            <form action="<%= request.getContextPath() %>/EditPoemServlet" method="get" style="display:inline;">
                 <input type="hidden" name="id" value="<%= poem.getId() %>">
                 <button>Edit</button>
             </form>

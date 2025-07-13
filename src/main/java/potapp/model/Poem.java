@@ -50,7 +50,7 @@ public class Poem {
     public int getCategoryId() {
         return categoryId;
     }
-    public void setCategory(int categoryId) {
+    public void setCategoryId(int categoryId) {
         this.categoryId = categoryId;
     }
 

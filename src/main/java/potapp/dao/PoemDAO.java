@@ -65,5 +65,55 @@ public class PoemDAO {
         return poems;
     }
 
-    // You can add more methods later: addPoem, updatePoem, deletePoem
+    // ✅ NEW: Get single poem by ID
+    public Poem getPoemById(int id) {
+        Poem poem = null;
+        String sql = "SELECT * FROM poems WHERE id = ?";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                poem = new Poem(
+                    rs.getInt("id"),
+                    rs.getString("title"),
+                    rs.getString("content"),
+                    rs.getInt("user_id"),
+                    rs.getInt("category_id"),
+                    rs.getFloat("rating"),
+                    rs.getTimestamp("created_at")
+                );
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return poem;
+    }
+
+    // ✅ NEW: Update poem
+    public boolean updatePoem(Poem poem) {
+        String sql = "UPDATE poems SET title = ?, content = ?, category_id = ? WHERE id = ?";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, poem.getTitle());
+            stmt.setString(2, poem.getContent());
+            stmt.setInt(3, poem.getCategoryId());
+            stmt.setInt(4, poem.getId());
+
+            int updated = stmt.executeUpdate();
+            return updated > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }

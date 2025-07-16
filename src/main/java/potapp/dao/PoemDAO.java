@@ -65,8 +65,7 @@ public class PoemDAO {
         return poems;
     }
 
-    // ✅ NEW: Get single poem by ID
-    public Poem getPoemById(int id) {
+    public static Poem getPoemById(int id) {
         Poem poem = null;
         String sql = "SELECT * FROM poems WHERE id = ?";
 
@@ -95,7 +94,6 @@ public class PoemDAO {
         return poem;
     }
 
-    // ✅ NEW: Update poem
     public boolean updatePoem(Poem poem) {
         String sql = "UPDATE poems SET title = ?, content = ?, category_id = ? WHERE id = ?";
 
@@ -116,8 +114,10 @@ public class PoemDAO {
 
         return false;
     }
+
     public boolean deletePoem(int id) {
         String sql = "DELETE FROM poems WHERE id = ?";
+
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -128,6 +128,53 @@ public class PoemDAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return false;
+    }
+
+    // ✅ New helper: Get user's name by user ID
+    public static String getUserNameById(int userId) {
+        String name = "";
+
+        String sql = "SELECT name FROM users WHERE id = ?";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                name = rs.getString("name");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return name;
+    }
+
+    // ✅ New helper: Get category name by category ID
+    public static String getCategoryNameById(int categoryId) {
+        String name = "";
+
+        String sql = "SELECT name FROM categories WHERE id = ?";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, categoryId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                name = rs.getString("name");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return name;
     }
 }

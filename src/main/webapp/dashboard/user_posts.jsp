@@ -53,6 +53,11 @@
     <input type="hidden" name="id" value="<%= poem.getId() %>">
     <button type="submit" style="background-color:red; color:white;">Delete</button>
 </form>
+<form action="<%= request.getContextPath() %>/ViewPoemServlet" method="get" style="display:inline;">
+    <input type="hidden" name="id" value="<%= poem.getId() %>">
+    <button>View</button>
+</form>
+
 
         </td>
     </tr>

@@ -1,40 +1,53 @@
-<!-- /dashboard/users.jsp -->
-<jsp:include page="../includes/header.jsp" />
-<h3>Manage Users</h3>
+<%@ page import="java.util.List, potapp.model.User" %>
+<%@ page session="true" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
-<button style="margin-bottom: 10px;">➕ Add User</button>
+<jsp:include page="/includes/header.jsp" />
 
-<table border="1" cellpadding="10" style="width: 100%;">
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Role</th>
-        <th>Actions</th>
-    </tr>
+<div class="container mt-4">
+    <h2>Admin Dashboard - Users</h2>
 
-    <tr>
-        <td>1</td>
-        <td>Nabin Joshi</td>
-        <td>nabin@example.com</td>
-        <td>user</td>
-        <td>
-            <button>Edit</button>
-            <button>Delete</button>
-            <button>Reset Password</button>
-        </td>
-    </tr>
+    <%
+        List<User> users = (List<User>) request.getAttribute("users");
 
-    <tr>
-        <td>2</td>
-        <td>Aman Sharma</td>
-        <td>aman@example.com</td>
-        <td>admin</td>
-        <td>
-            <button>Edit</button>
-            <button>Delete</button>
-            <button>Reset Password</button>
-        </td>
-    </tr>
-</table>
-<jsp:include page="../includes/footer.jsp" />
+        if (users != null && !users.isEmpty()) {
+    %>
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for (User user : users) { %>
+                    <tr>
+                        <td><%= user.getName() %></td>
+                        <td><%= user.getEmail() %></td>
+                        <td><%= user.getRole() %></td>
+                        <td>
+                            <form action="<%= request.getContextPath() %>/EditUserServlet" method="get" style="display:inline;">
+                                <input type="hidden" name="id" value="<%= user.getId() %>" />
+                                <button class="btn btn-sm btn-warning">Edit</button>
+                            </form>
+                            <form action="<%= request.getContextPath() %>/DeleteUserServlet" method="post" style="display:inline;" onsubmit="return confirm('Are you sure?');">
+                                <input type="hidden" name="id" value="<%= user.getId() %>" />
+                                <button class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    <%
+        } else {
+    %>
+        <div class="alert alert-info">No users found.</div>
+    <%
+        }
+    %>
+</div>
+
+<jsp:include page="/includes/footer.jsp" />

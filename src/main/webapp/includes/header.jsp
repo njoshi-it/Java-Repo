@@ -31,7 +31,7 @@
 
     <% if ("admin".equals(role)) { %>
         
-        <a href="<%= request.getContextPath() %>/dashboard/admin_posts.jsp" style="color:white; margin-right: 20px;">Posts</a>
+        <a href="<%= request.getContextPath() %>/AdminPostsServlet" style="color:white; margin-right: 20px;">Posts</a>
         <a href="<%= request.getContextPath() %>/dashboard/admin_users.jsp" style="color:white; margin-right: 20px;">Users</a>
     <% } else if ("user".equals(role)) { %>
         <a href="<%= request.getContextPath() %>/dashboard/user_posts.jsp" style="color:white; margin-right: 20px;">Posts</a>

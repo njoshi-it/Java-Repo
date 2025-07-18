@@ -9,7 +9,7 @@
 
     if (currentUser != null) {
         if ("admin".equals(currentUser.getRole())) {
-            homeLink = request.getContextPath() + "/dashboard/admin_home.jsp";
+            homeLink = request.getContextPath() + "/AdminHomeServlet";
         } else if ("user".equals(currentUser.getRole())) {
             homeLink = request.getContextPath() + "/dashboard/user_home.jsp";
         }

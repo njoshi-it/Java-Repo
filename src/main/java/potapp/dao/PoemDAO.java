@@ -6,6 +6,8 @@ import potapp.util.DBUtil;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PoemDAO {
 
@@ -176,5 +178,39 @@ public class PoemDAO {
         }
 
         return name;
+    }
+    public static Map<Integer, List<Poem>> getPoemsGroupedByCategory() {
+        Map<Integer, List<Poem>> categoryMap = new HashMap<>();
+
+        String sql = "SELECT * FROM poems ORDER BY category_id";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Poem poem = new Poem(
+                    rs.getInt("id"),
+                    rs.getString("title"),
+                    rs.getString("content"),
+                    rs.getInt("user_id"),
+                    rs.getInt("category_id"),
+                    rs.getFloat("rating"),
+                    rs.getTimestamp("created_at")
+                );
+
+                int catId = poem.getCategoryId();
+
+                if (!categoryMap.containsKey(catId)) {
+                    categoryMap.put(catId, new ArrayList<>());
+                }
+                categoryMap.get(catId).add(poem);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return categoryMap;
     }
 }

@@ -42,7 +42,7 @@ public class LoginServlet extends HttpServlet {
 
             // Redirect based on role
             if ("admin".equalsIgnoreCase(user.getRole())) {
-                response.sendRedirect("dashboard/admin_home.jsp");
+                response.sendRedirect("AdminHomeServlet");
             } else {
                 response.sendRedirect("dashboard/user_home.jsp");
             }

@@ -199,6 +199,13 @@ public class PoemDAO {
                     rs.getTimestamp("created_at")
                 );
 
+                // ✅ Set User object with ID and Name
+                potapp.model.User user = new potapp.model.User();
+                int userId = rs.getInt("user_id");
+                user.setId(userId);
+                user.setName(getUserNameById(userId)); // use helper method
+                poem.setUser(user);
+
                 int catId = poem.getCategoryId();
 
                 if (!categoryMap.containsKey(catId)) {

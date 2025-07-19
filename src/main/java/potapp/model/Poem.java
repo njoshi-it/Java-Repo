@@ -10,6 +10,15 @@ public class Poem {
     private int categoryId;
     private float rating;
     private Timestamp createdAt;
+    private User user;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     // Constructors
     public Poem() {}

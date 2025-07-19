@@ -1,76 +1,104 @@
-<%@ page import="java.util.*, potapp.model.Poem, potapp.dao.PoemDAO" %>
 <%@ page session="true" %>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ include file="../includes/header.jsp" %>
+<%@ page import="java.util.*, potapp.dao.PoemDAO, potapp.model.Poem, potapp.model.User" %>
 
-<jsp:include page="/includes/header.jsp" />
-
-<%
-    Map<Integer, List<Poem>> poemsByCategory = (Map<Integer, List<Poem>>) request.getAttribute("poemsByCategory");
-    Map<Integer, String> categoryNames = (Map<Integer, String>) request.getAttribute("categoryNames");
-%>
-
-<div class="container mt-4">
-    <h2>Admin Dashboard - Poem Categories</h2>
-
-    <%
-        if (poemsByCategory != null && !poemsByCategory.isEmpty()) {
-            for (Map.Entry<Integer, List<Poem>> entry : poemsByCategory.entrySet()) {
-                Integer categoryId = entry.getKey();
-                String categoryName = categoryNames.get(categoryId);
-                List<Poem> poems = entry.getValue();
-    %>
-                <div class="card mt-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5><%= categoryName %></h5>
-                    </div>
-                    <div class="card-body">
-                        <% if (poems != null && !poems.isEmpty()) { %>
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Title</th>
-                                        <th>Created By</th>
-                                        <th>Rating</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% for (Poem poem : poems) { %>
-                                        <tr>
-                                            <td><%= poem.getTitle() %></td>
-                                            <td><%= PoemDAO.getUserNameById(poem.getUserId()) %></td>
-                                            <td><%= poem.getRating() %></td>
-                                            <td>
-                                                <form action="<%= request.getContextPath() %>/ViewPoemServlet" method="get" style="display:inline;">
-                                                    <input type="hidden" name="id" value="<%= poem.getId() %>" />
-                                                    <button class="btn btn-sm btn-info">View</button>
-                                                </form>
-                                                <form action="<%= request.getContextPath() %>/EditPoemServlet" method="get" style="display:inline;">
-                                                    <input type="hidden" name="id" value="<%= poem.getId() %>" />
-                                                    <button class="btn btn-sm btn-warning">Edit</button>
-                                                </form>
-                                                <form action="<%= request.getContextPath() %>/DeletePoemServlet" method="post" style="display:inline;" onsubmit="return confirm('Are you sure?');">
-                                                    <input type="hidden" name="id" value="<%= poem.getId() %>" />
-                                                    <button class="btn btn-sm btn-danger">Delete</button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    <% } %>
-                                </tbody>
-                            </table>
-                        <% } else { %>
-                            <p>No poems found in this category.</p>
-                        <% } %>
-                    </div>
-                </div>
-    <%
-            }
-        } else {
-    %>
-        <div class="alert alert-info mt-4">No poems available to show.</div>
-    <%
+<html>
+<head>
+    <title>Admin Home</title>
+    <style>
+        .category-section {
+            margin-bottom: 30px;
         }
+
+        .category-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .poem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .poem-card {
+            background: #f4f4f4;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid #ccc;
+        }
+
+        .poem-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .poem-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .poem-body {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .poem-author {
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        a.card-link {
+            text-decoration: none;
+            color: inherit;
+        }
+    </style>
+</head>
+<body>
+
+<div style="padding: 20px;">
+    <h2>Welcome, Admin!</h2>
+
+    <%
+        Map<Integer, List<Poem>> categoryMap = PoemDAO.getPoemsGroupedByCategory();
+        for (Map.Entry<Integer, List<Poem>> entry : categoryMap.entrySet()) {
+            int categoryId = entry.getKey();
+            String categoryName = PoemDAO.getCategoryNameById(categoryId);
+            List<Poem> poems = entry.getValue();
+            if (poems != null && !poems.isEmpty()) {
     %>
+    <div class="category-section">
+        <div class="category-title"><%= categoryName %> Poems</div>
+        <div class="poem-grid">
+            <% for (Poem poem : poems) { %>
+                <a class="card-link" href="<%= request.getContextPath() %>/ViewPoemServlet?id=<%= poem.getId() %>">
+                    <div class="poem-card">
+                        <div class="poem-title"><%= poem.getTitle() %></div>
+                        <div class="poem-body">
+                            <%= poem.getContent().length() > 100 ? poem.getContent().substring(0, 100) + "..." : poem.getContent() %>
+                        </div>
+                        <div class="poem-author">By: <%= poem.getUser().getName() %></div>
+                    </div>
+                </a>
+            <% } %>
+        </div>
+    </div>
+    <% 
+            } 
+        } 
+    %>
+
 </div>
 
-<jsp:include page="/includes/footer.jsp" />
+<%@ include file="../includes/footer.jsp" %>
+</body>
+</html>

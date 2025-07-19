@@ -30,7 +30,7 @@
         <p class="success">Registration successful! Please login.</p>
     <% } %>
 
-    <form action="login" method="post">
+    <form action="<%= request.getContextPath() %>/LoginServlet" method="post">
         <label>Email:</label><br/>
         <input type="text" name="email" required /><br/>
 

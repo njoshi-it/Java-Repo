@@ -94,5 +94,25 @@ public class UserDAO {
         }
         return users;
     }
+    public static User getUserById(int id) {
+        User user = null;
+        try (Connection conn = DBUtil.getConnection()) {
+            String sql = "SELECT * FROM users WHERE id = ?";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                user = new User();
+                user.setId(rs.getInt("id"));
+                user.setName(rs.getString("name"));
+                user.setEmail(rs.getString("email"));
+                user.setRole(rs.getString("role"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return user;
+    }
+
 
 }

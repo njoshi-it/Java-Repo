@@ -1,13 +1,11 @@
 package potapp.dao;
 
 import potapp.model.Poem;
+import potapp.model.User;
 import potapp.util.DBUtil;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class PoemDAO {
 
@@ -29,6 +27,11 @@ public class PoemDAO {
                     rs.getFloat("rating"),
                     rs.getTimestamp("created_at")
                 );
+
+                int userId = rs.getInt("user_id");
+                User user = UserDAO.getUserById(userId);
+                poem.setUser(user);
+
                 poems.add(poem);
             }
 
@@ -58,6 +61,10 @@ public class PoemDAO {
                     rs.getFloat("rating"),
                     rs.getTimestamp("created_at")
                 );
+
+                User user = UserDAO.getUserById(userId);
+                poem.setUser(user);
+
                 poems.add(poem);
             }
 
@@ -87,6 +94,10 @@ public class PoemDAO {
                     rs.getFloat("rating"),
                     rs.getTimestamp("created_at")
                 );
+
+                int userId = rs.getInt("user_id");
+                User user = UserDAO.getUserById(userId);
+                poem.setUser(user);
             }
 
         } catch (Exception e) {
@@ -134,7 +145,6 @@ public class PoemDAO {
         return false;
     }
 
-    // ✅ New helper: Get user's name by user ID
     public static String getUserNameById(int userId) {
         String name = "";
 
@@ -157,7 +167,6 @@ public class PoemDAO {
         return name;
     }
 
-    // ✅ New helper: Get category name by category ID
     public static String getCategoryNameById(int categoryId) {
         String name = "";
 
@@ -179,6 +188,7 @@ public class PoemDAO {
 
         return name;
     }
+
     public static Map<Integer, List<Poem>> getPoemsGroupedByCategory() {
         Map<Integer, List<Poem>> categoryMap = new HashMap<>();
 
@@ -199,19 +209,12 @@ public class PoemDAO {
                     rs.getTimestamp("created_at")
                 );
 
-                // ✅ Set User object with ID and Name
-                potapp.model.User user = new potapp.model.User();
                 int userId = rs.getInt("user_id");
-                user.setId(userId);
-                user.setName(getUserNameById(userId)); // use helper method
+                User user = UserDAO.getUserById(userId);
                 poem.setUser(user);
 
                 int catId = poem.getCategoryId();
-
-                if (!categoryMap.containsKey(catId)) {
-                    categoryMap.put(catId, new ArrayList<>());
-                }
-                categoryMap.get(catId).add(poem);
+                categoryMap.computeIfAbsent(catId, k -> new ArrayList<>()).add(poem);
             }
 
         } catch (Exception e) {
@@ -220,4 +223,98 @@ public class PoemDAO {
 
         return categoryMap;
     }
+
+    public static void saveRating(int poemId, int userId, int rating) {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtil.getConnection();
+
+            // Check if a rating already exists for this user and poem
+            String checkSql = "SELECT id FROM ratings WHERE poem_id = ? AND user_id = ?";
+            stmt = conn.prepareStatement(checkSql);
+            stmt.setInt(1, poemId);
+            stmt.setInt(2, userId);
+            rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                // Rating exists → update
+                int ratingId = rs.getInt("id");
+                DBUtil.close(rs);
+                DBUtil.close(stmt);
+
+                String updateSql = "UPDATE ratings SET rating = ? WHERE id = ?";
+                stmt = conn.prepareStatement(updateSql);
+                stmt.setInt(1, rating);
+                stmt.setInt(2, ratingId);
+                stmt.executeUpdate();
+            } else {
+                // Rating doesn't exist → insert
+                DBUtil.close(rs);
+                DBUtil.close(stmt);
+
+                String insertSql = "INSERT INTO ratings (poem_id, user_id, rating) VALUES (?, ?, ?)";
+                stmt = conn.prepareStatement(insertSql);
+                stmt.setInt(1, poemId);
+                stmt.setInt(2, userId);
+                stmt.setInt(3, rating);
+                stmt.executeUpdate();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(rs);
+            DBUtil.close(stmt);
+            DBUtil.close(conn);
+        }
+    }
+
+
+    public static double getAverageRating(int poemId) {
+        double avg = 0.0;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtil.getConnection();
+            String sql = "SELECT AVG(rating) AS avg_rating FROM ratings WHERE poem_id = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, poemId);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                avg = rs.getDouble("avg_rating");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBUtil.close(rs);
+            DBUtil.close(stmt);
+            DBUtil.close(conn);
+        }
+
+        return avg;
+    }
+    public static int getUserRating(int poemId, int userId) {
+        int rating = 0;
+        String sql = "SELECT rating FROM ratings WHERE poem_id = ? AND user_id = ?";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, poemId);
+            stmt.setInt(2, userId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                rating = rs.getInt("rating");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return rating;
+    }
+
 }

@@ -66,8 +66,6 @@
 <body>
 
 <div style="padding: 20px;">
-    <h2>Welcome, Admin!</h2>
-
     <%
         Map<Integer, List<Poem>> categoryMap = PoemDAO.getPoemsGroupedByCategory();
         for (Map.Entry<Integer, List<Poem>> entry : categoryMap.entrySet()) {

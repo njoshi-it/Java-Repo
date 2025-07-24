@@ -1,5 +1,7 @@
 <%@ page import="potapp.model.User" %>
 <%@ page session="true" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+
 <%
     User currentUser = (User) session.getAttribute("user");
     if (currentUser == null || !"user".equals(currentUser.getRole())) {
@@ -110,13 +112,15 @@
             <option value="4">Nature</option>
         </select>
 
-        <label for="bg-style">Choose Background Style:</label>
-        <select id="bg-style" name="bgStyle" class="bg-selector" onchange="applyBackgroundStyle()">
-            <option value="plain">Plain</option>
-            <option value="gradient">Gradient</option>
-            <option value="parchment">Parchment</option>
-            <option value="dark">Dark</option>
-        </select>
+        <div class="form-group">
+                <label for="backgroundStyle">Background Style:</label>
+                <select id="backgroundStyle" onchange="applyBackgroundStyle()">
+                    <option value="plain">Plain White</option>
+                    <option value="parchment">Parchment</option>
+                    <option value="sky">Sky Blue Gradient</option>
+                    <option value="dark">Dark Mode</option>
+                </select>
+            </div>
 
         <label for="content">Content:</label>
         <textarea name="content" id="poemContent" rows="10" required class="poem-textarea plain-bg"></textarea>
@@ -127,13 +131,30 @@
 
 <script>
     function applyBackgroundStyle() {
-        const textarea = document.getElementById('poemContent');
-        const selectedStyle = document.getElementById('bg-style').value;
+    	const style = document.getElementById("backgroundStyle").value;
+        const contentArea = document.getElementById("content");
 
-        // Remove all background classes first
-        textarea.classList.remove("plain-bg", "gradient-bg", "parchment-bg", "dark-bg");
+        switch(style) {
+            case "plain":
+                contentArea.style.background = "#ffffff";
+                break;
+            case "parchment":
+                contentArea.style.background = "url('https://www.transparenttextures.com/patterns/old-mathematics.png')";
+                break;
+            case "sky":
+                contentArea.style.background = "linear-gradient(#e0f7fa, #b2ebf2)";
+                break;
+            case "dark":
+                contentArea.style.background = "#343a40";
+                contentArea.style.color = "#f8f9fa";
+                break;
+            default:
+                contentArea.style.background = "#ffffff";
+                contentArea.style.color = "#000000";
+        }
 
-        // Apply selected background class
-        textarea.classList.add(selectedStyle + "-bg");
+        if (style !== "dark") {
+            contentArea.style.color = "#000000";
+        }
     }
 </script>

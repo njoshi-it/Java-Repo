@@ -49,23 +49,23 @@ public class PoemDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Poem poem = new Poem(
+                        rs.getInt("id"),
+                        rs.getString("title"),
+                        rs.getString("content"),
+                        rs.getInt("user_id"),
+                        rs.getInt("category_id"),
+                        rs.getFloat("rating"),
+                        rs.getTimestamp("created_at")
+                    );
 
-            while (rs.next()) {
-                Poem poem = new Poem(
-                    rs.getInt("id"),
-                    rs.getString("title"),
-                    rs.getString("content"),
-                    rs.getInt("user_id"),
-                    rs.getInt("category_id"),
-                    rs.getFloat("rating"),
-                    rs.getTimestamp("created_at")
-                );
+                    User user = UserDAO.getUserById(userId);
+                    poem.setUser(user);
 
-                User user = UserDAO.getUserById(userId);
-                poem.setUser(user);
-
-                poems.add(poem);
+                    poems.add(poem);
+                }
             }
 
         } catch (Exception e) {
@@ -82,22 +82,22 @@ public class PoemDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    poem = new Poem(
+                        rs.getInt("id"),
+                        rs.getString("title"),
+                        rs.getString("content"),
+                        rs.getInt("user_id"),
+                        rs.getInt("category_id"),
+                        rs.getFloat("rating"),
+                        rs.getTimestamp("created_at")
+                    );
 
-            if (rs.next()) {
-                poem = new Poem(
-                    rs.getInt("id"),
-                    rs.getString("title"),
-                    rs.getString("content"),
-                    rs.getInt("user_id"),
-                    rs.getInt("category_id"),
-                    rs.getFloat("rating"),
-                    rs.getTimestamp("created_at")
-                );
-
-                int userId = rs.getInt("user_id");
-                User user = UserDAO.getUserById(userId);
-                poem.setUser(user);
+                    int userId = rs.getInt("user_id");
+                    User user = UserDAO.getUserById(userId);
+                    poem.setUser(user);
+                }
             }
 
         } catch (Exception e) {
@@ -154,10 +154,10 @@ public class PoemDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                name = rs.getString("name");
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    name = rs.getString("name");
+                }
             }
 
         } catch (Exception e) {
@@ -176,10 +176,10 @@ public class PoemDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, categoryId);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                name = rs.getString("name");
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    name = rs.getString("name");
+                }
             }
 
         } catch (Exception e) {
@@ -224,97 +224,90 @@ public class PoemDAO {
         return categoryMap;
     }
 
-    public static void saveRating(int poemId, int userId, int rating) {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+    /**
+     * Save a rating or update if it already exists for the user and poem.
+     */
+    public static void saveOrUpdateRating(int poemId, int userId, int rating) {
+        String checkSql = "SELECT id FROM ratings WHERE poem_id = ? AND user_id = ?";
+        String updateSql = "UPDATE ratings SET rating = ? WHERE id = ?";
+        String insertSql = "INSERT INTO ratings (poem_id, user_id, rating) VALUES (?, ?, ?)";
 
-        try {
-            conn = DBUtil.getConnection();
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
 
-            // Check if a rating already exists for this user and poem
-            String checkSql = "SELECT id FROM ratings WHERE poem_id = ? AND user_id = ?";
-            stmt = conn.prepareStatement(checkSql);
-            stmt.setInt(1, poemId);
-            stmt.setInt(2, userId);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                // Rating exists → update
-                int ratingId = rs.getInt("id");
-                DBUtil.close(rs);
-                DBUtil.close(stmt);
-
-                String updateSql = "UPDATE ratings SET rating = ? WHERE id = ?";
-                stmt = conn.prepareStatement(updateSql);
-                stmt.setInt(1, rating);
-                stmt.setInt(2, ratingId);
-                stmt.executeUpdate();
-            } else {
-                // Rating doesn't exist → insert
-                DBUtil.close(rs);
-                DBUtil.close(stmt);
-
-                String insertSql = "INSERT INTO ratings (poem_id, user_id, rating) VALUES (?, ?, ?)";
-                stmt = conn.prepareStatement(insertSql);
-                stmt.setInt(1, poemId);
-                stmt.setInt(2, userId);
-                stmt.setInt(3, rating);
-                stmt.executeUpdate();
+            checkStmt.setInt(1, poemId);
+            checkStmt.setInt(2, userId);
+            try (ResultSet rs = checkStmt.executeQuery()) {
+                if (rs.next()) {
+                    // Exists, update
+                    int ratingId = rs.getInt("id");
+                    try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                        updateStmt.setInt(1, rating);
+                        updateStmt.setInt(2, ratingId);
+                        updateStmt.executeUpdate();
+                    }
+                } else {
+                    // Doesn't exist, insert
+                    try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+                        insertStmt.setInt(1, poemId);
+                        insertStmt.setInt(2, userId);
+                        insertStmt.setInt(3, rating);
+                        insertStmt.executeUpdate();
+                    }
+                }
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            DBUtil.close(rs);
-            DBUtil.close(stmt);
-            DBUtil.close(conn);
         }
     }
 
-
+    /**
+     * Get average rating for a poem; returns 0.0 if no ratings exist.
+     */
     public static double getAverageRating(int poemId) {
         double avg = 0.0;
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        String sql = "SELECT AVG(rating) AS avg_rating FROM ratings WHERE poem_id = ?";
 
-        try {
-            conn = DBUtil.getConnection();
-            String sql = "SELECT AVG(rating) AS avg_rating FROM ratings WHERE poem_id = ?";
-            stmt = conn.prepareStatement(sql);
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, poemId);
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                avg = rs.getDouble("avg_rating");
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    avg = rs.getDouble("avg_rating");
+                }
             }
+
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            DBUtil.close(rs);
-            DBUtil.close(stmt);
-            DBUtil.close(conn);
         }
 
         return avg;
     }
+
+    /**
+     * Get user's rating for a poem, returns 0 if none found.
+     */
     public static int getUserRating(int poemId, int userId) {
         int rating = 0;
         String sql = "SELECT rating FROM ratings WHERE poem_id = ? AND user_id = ?";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, poemId);
             stmt.setInt(2, userId);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                rating = rs.getInt("rating");
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    rating = rs.getInt("rating");
+                }
             }
-        } catch (SQLException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return rating;
     }
-
 }

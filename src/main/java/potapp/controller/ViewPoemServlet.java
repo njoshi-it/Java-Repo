@@ -33,9 +33,10 @@ public class ViewPoemServlet extends HttpServlet {
                     }
                 }
 
-                // Fetch creator name and category name using helper methods in PoemDAO
+                // Fetch creator name and category name
                 String creatorName = PoemDAO.getUserNameById(poem.getUserId());
-                String categoryName = PoemDAO.getCategoryNameById(poem.getCategoryId());
+                // Optional if you want category name
+                // String categoryName = PoemDAO.getCategoryNameById(poem.getCategoryId());
 
                 // Get rating info
                 Double avgRating = PoemDAO.getAverageRating(poem.getId());
@@ -44,20 +45,17 @@ public class ViewPoemServlet extends HttpServlet {
                 // Set attributes for JSP
                 request.setAttribute("poem", poem);
                 request.setAttribute("creatorName", creatorName);
-                request.setAttribute("categoryName", categoryName);
                 request.setAttribute("avgRating", (avgRating != null) ? avgRating : 0.0);
                 request.setAttribute("userRating", (userRating != null) ? userRating : 0);
 
-                // Forward to view_poem.jsp inside dashboard folder (use leading slash)
+                // Forward to JSP
                 RequestDispatcher dispatcher = request.getRequestDispatcher("/dashboard/view_poem.jsp");
                 dispatcher.forward(request, response);
             } else {
-                // Poem not found, redirect or show error
                 response.sendRedirect("user_home.jsp?error=PoemNotFound");
             }
 
         } catch (NumberFormatException e) {
-            // If id param is not a number
             response.sendRedirect("user_home.jsp?error=InvalidPoemId");
         }
     }

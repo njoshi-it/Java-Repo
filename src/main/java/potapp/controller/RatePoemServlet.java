@@ -1,48 +1,41 @@
 package potapp.controller;
 
-import jakarta.servlet.ServletException;
+import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import potapp.model.User;
-
+import java.io.IOException;
 
 import potapp.dao.PoemDAO;
-
-import java.io.IOException;
-import java.io.PrintWriter;
+import potapp.model.User;
 
 @WebServlet("/RatePoemServlet")
 public class RatePoemServlet extends HttpServlet {
+
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String poemIdStr = request.getParameter("poemId");
-        String ratingStr = request.getParameter("rating");
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-        System.out.println("Received poemId: " + poemIdStr);
-        System.out.println("Received rating: " + ratingStr);
+        HttpSession session = request.getSession(false);
+        User user = (session != null) ? (User) session.getAttribute("user") : null;
 
-        if (poemIdStr == null || poemIdStr.isEmpty() || ratingStr == null || ratingStr.isEmpty()) {
-            System.out.println("Missing parameter(s)");
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("Missing poemId or rating");
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
         }
 
         try {
-            int poemId = Integer.parseInt(poemIdStr);
-            int rating = Integer.parseInt(ratingStr);
-            User user = (User) request.getSession().getAttribute("user");
-            int userId = user.getId();
+            int poemId = Integer.parseInt(request.getParameter("poemId"));
+            int rating = Integer.parseInt(request.getParameter("rating"));
 
-            PoemDAO.saveRating(poemId, userId, rating);
-            double average = PoemDAO.getAverageRating(poemId);
+            // Save or update rating in DB
+            PoemDAO.saveOrUpdateRating(poemId, user.getId(), rating);
 
-            response.setContentType("application/json");
-            response.getWriter().write("{\"average\":" + average + "}");
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("error");
+            // Redirect back to the poem page to see updated rating
+            response.sendRedirect(request.getContextPath() + "/ViewPoemServlet?id=" + poemId);
+
+        } catch (NumberFormatException e) {
+            // Invalid input, redirect somewhere
+            response.sendRedirect(request.getContextPath() + "/user_home.jsp?error=InvalidInput");
         }
     }
 }

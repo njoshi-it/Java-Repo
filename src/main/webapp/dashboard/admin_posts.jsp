@@ -168,15 +168,16 @@
         <%
             } else {
                 for (Poem poem : poems) {
-                    String authorName = PoemDAO.getUserNameById(poem.getUserId());
+                	String authorName = PoemDAO.getUserNameById(poem.getUserId());
                     String categoryName = PoemDAO.getCategoryNameById(poem.getCategoryId());
+                    double avgRating = PoemDAO.getAverageRating(poem.getId());
         %>
             <tr>
                 <td data-label="Title"><%= poem.getTitle() %></td>
-                <td data-label="Author"><%= authorName %></td>
-                <td data-label="Category"><%= categoryName %></td>
-                <td><%= String.format("%.1f", poem.getRating()) %></td>
-                <td data-label="Created At"><%= poem.getCreatedAt() %></td>
+        <td data-label="Author"><%= authorName %></td>
+        <td data-label="Category"><%= categoryName %></td>
+        <td data-label="Rating"><%= String.format("%.1f", avgRating) %></td>
+        <td data-label="Created At"><%= poem.getCreatedAt() %></td>
                 <td class="actions" data-label="Actions">
                     <form action="<%= request.getContextPath() %>/ViewPoemServlet" method="get" style="display:inline;">
                         <input type="hidden" name="id" value="<%= poem.getId() %>">

@@ -1,6 +1,7 @@
 eclipse.preferences.version=1
 encoding//src/main/webapp/dashboard/admin_home.jsp=UTF-8
 encoding//src/main/webapp/dashboard/admin_users.jsp=UTF-8
+encoding//src/main/webapp/dashboard/create_poem.jsp=UTF-8
 encoding//src/main/webapp/dashboard/edit_poem.jsp=UTF-8
 encoding//src/main/webapp/dashboard/user_home.jsp=UTF-8
 encoding//src/main/webapp/dashboard/user_posts.jsp=UTF-8

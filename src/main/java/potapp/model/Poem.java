@@ -8,9 +8,10 @@ public class Poem {
     private String content;
     private int userId;
     private int categoryId;
-    private float rating;
     private Timestamp createdAt;
     private User user;
+    private double rating;
+
 
     public User getUser() {
         return user;
@@ -73,7 +74,8 @@ public class Poem {
     public double getRating() {
         return rating;
     }
-    public void setRating(float rating) {
+
+    public void setRating(double rating) {
         this.rating = rating;
     }
     public Timestamp getCreatedAt() {

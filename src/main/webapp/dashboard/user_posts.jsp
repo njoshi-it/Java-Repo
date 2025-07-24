@@ -205,7 +205,8 @@
             <tr>
                 <td data-label="Title"><%= poem.getTitle() %></td>
                 <td data-label="Category"><%= categoryName %></td>
-                <td data-label="Rating"><%= String.format("%.1f", poem.getRating()) %></td>
+                <td><%= String.format("%.1f", poem.getRating()) %></td>
+
                 <td data-label="Created At"><%= poem.getCreatedAt() %></td>
                 <td class="actions" data-label="Actions">
                     <form action="<%= request.getContextPath() %>/EditPoemServlet" method="get" style="display:inline;">

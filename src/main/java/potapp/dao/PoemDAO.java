@@ -43,32 +43,28 @@ public class PoemDAO {
 
     public List<Poem> getPoemsByUserId(int userId) {
         List<Poem> poems = new ArrayList<>();
-        String sql = "SELECT * FROM poems WHERE user_id = ? ORDER BY created_at DESC";
+        String sql = "SELECT p.*, COALESCE(AVG(r.rating), 0) AS avg_rating " +
+                     "FROM poems p LEFT JOIN ratings r ON p.id = r.poem_id " +
+                     "WHERE p.user_id = ? " +
+                     "GROUP BY p.id";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setInt(1, userId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Poem poem = new Poem(
-                        rs.getInt("id"),
-                        rs.getString("title"),
-                        rs.getString("content"),
-                        rs.getInt("user_id"),
-                        rs.getInt("category_id"),
-                        rs.getFloat("rating"),
-                        rs.getTimestamp("created_at")
-                    );
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Poem poem = new Poem();
+                poem.setId(rs.getInt("id"));
+                poem.setUserId(rs.getInt("user_id"));
+                poem.setTitle(rs.getString("title"));
+                poem.setCategoryId(rs.getInt("category_id"));
+                poem.setContent(rs.getString("content"));
+                poem.setCreatedAt(rs.getTimestamp("created_at"));
+                poem.setRating(rs.getDouble("avg_rating")); // store avg rating
 
-                    User user = UserDAO.getUserById(userId);
-                    poem.setUser(user);
-
-                    poems.add(poem);
-                }
+                poems.add(poem);
             }
-
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return poems;
